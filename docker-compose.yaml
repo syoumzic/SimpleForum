@@ -1,0 +1,43 @@
+networks:
+  dev:
+
+services:
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: database
+    ports:
+      - "5432:5432"
+    networks:
+      - dev
+  nginx:
+    image: nginx:stable-alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - frontend
+      - backend
+    networks:
+      - dev
+
+  backend:
+    build:
+      context: ./backend
+    depends_on:
+      - db
+    ports:
+      - "8080:8080"
+    networks:
+      - dev
+
+  frontend:
+    build:
+      context: ./frontend
+    volumes:
+    - ./frontend/assets:/app/assets
+    networks:
+      - dev
